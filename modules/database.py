@@ -52,36 +52,36 @@ def get_existing_data_range() -> dict:
 
 def upsert_prices(df: pd.DataFrame):
     """
-    Update or insert stock price data to database
+    Update or insert stock price data to database using INSERT OR REPLACE
 
     Args:
         df: DataFrame containing code, date, open, high, low, close, volume columns
     """
     if df.empty:
         return
+
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"]).dt.date.astype(str)
 
     with sqlite3.connect(DB_PATH) as conn:
-        # Create temporary table
-        df.to_sql("_prices_in", conn, if_exists="replace", index=False)
+        cursor = conn.cursor()
 
-        # Delete existing records that match
-        conn.execute("DELETE FROM prices WHERE (code, date) IN (SELECT code, date FROM _prices_in)")
+        # Use INSERT OR REPLACE to handle duplicates
+        records_inserted = 0
+        for _, row in df.iterrows():
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO prices(code, date, open, high, low, close, volume)
+                VALUES(?, ?, ?, ?, ?, ?, ?)
+                """,
+                (row['code'], row['date'], row['open'], row['high'],
+                 row['low'], row['close'], row['volume'])
+            )
+            records_inserted += 1
 
-        # Insert new/updated records
-        conn.execute(
-            """
-            INSERT INTO prices(code, date, open, high, low, close, volume)
-            SELECT code, date, open, high, low, close, volume FROM _prices_in
-            """
-        )
-
-        # Clean up temporary table
-        conn.execute("DROP TABLE IF EXISTS _prices_in")
         conn.commit()
 
-    logger.info(f"Data saved to database: {DB_PATH}, updated {len(df)} records")
+    logger.info(f"Data saved to database: {DB_PATH}, upserted {records_inserted} records")
 
 
 def load_recent_prices(days=120) -> pd.DataFrame:
