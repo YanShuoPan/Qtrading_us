@@ -38,9 +38,8 @@ env/
 .env
 
 # Data files
-data/
-*.sqlite
-*.db
+# Note: data/ directory is committed for GitHub Actions persistence
+# Individual sqlite files are tracked for workflow continuity
 
 # Output files (keep docs/ for GitHub Pages)
 output/
