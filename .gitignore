@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+
+# Data files
+data/
+*.sqlite
+*.db
+
+# Output files (keep docs/ for GitHub Pages)
+output/
+output/*.png
+output/*.csv
+
+# Keep docs directory for GitHub Pages (except large files)
+# docs/ should be committed
+
+# Logs
+*.log
+debug.log
+
+# OS
+.DS_Store
+Thumbs.db
