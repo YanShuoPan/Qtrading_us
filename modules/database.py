@@ -61,18 +61,27 @@ def upsert_prices(df: pd.DataFrame):
         return
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"]).dt.date.astype(str)
+
     with sqlite3.connect(DB_PATH) as conn:
+        # Create temporary table
         df.to_sql("_prices_in", conn, if_exists="replace", index=False)
+
+        # Delete existing records that match
         conn.execute("DELETE FROM prices WHERE (code, date) IN (SELECT code, date FROM _prices_in)")
+
+        # Insert new/updated records
         conn.execute(
             """
             INSERT INTO prices(code, date, open, high, low, close, volume)
             SELECT code, date, open, high, low, close, volume FROM _prices_in
             """
         )
-        conn.execute("DROP TABLE _prices_in")
+
+        # Clean up temporary table
+        conn.execute("DROP TABLE IF EXISTS _prices_in")
         conn.commit()
-    logger.info(f"Data saved to database: {DB_PATH}")
+
+    logger.info(f"Data saved to database: {DB_PATH}, updated {len(df)} records")
 
 
 def load_recent_prices(days=120) -> pd.DataFrame:
