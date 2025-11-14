@@ -2,6 +2,7 @@
 Stock codes module - Manage US stock symbols
 """
 import os
+import json
 from .logger import get_logger
 
 logger = get_logger(__name__)
@@ -109,20 +110,56 @@ STOCK_NAMES = {
 }
 
 
+def load_stock_list_from_json(filepath='data/us_stock_list.json'):
+    """
+    Load stock list from JSON file
+
+    Args:
+        filepath: Path to JSON file
+
+    Returns:
+        list: Stock ticker symbols, or None if file doesn't exist
+    """
+    if not os.path.exists(filepath):
+        return None
+
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            tickers = data.get('tickers', [])
+            logger.info(f"Loaded {len(tickers)} stocks from {filepath}")
+            logger.info(f"  Generated at: {data.get('generated_at', 'Unknown')}")
+            return tickers
+    except Exception as e:
+        logger.warning(f"Failed to load {filepath}: {e}")
+        return None
+
+
 def get_stock_codes():
     """
-    Get stock codes list from environment variable or use default list
+    Get stock codes list with priority:
+    1. Environment variable US_STOCK_CODES
+    2. JSON file (data/us_stock_list.json)
+    3. Default hardcoded list
 
     Returns:
         list: Stock ticker symbols
     """
+    # Priority 1: Custom codes from environment variable
     custom_codes = os.environ.get("US_STOCK_CODES", "").strip()
     if custom_codes:
         codes = [c.strip() for c in custom_codes.split(",") if c.strip()]
-        logger.info(f"Using custom stock list: {len(codes)} stocks")
+        logger.info(f"Using custom stock list from env: {len(codes)} stocks")
         return codes
 
-    logger.info(f"Using default stock list: {len(DEFAULT_US_STOCKS)} stocks")
+    # Priority 2: Load from JSON file
+    json_codes = load_stock_list_from_json()
+    if json_codes:
+        logger.info(f"Using stock list from JSON: {len(json_codes)} stocks")
+        return json_codes
+
+    # Priority 3: Default hardcoded list
+    logger.info(f"Using default hardcoded stock list: {len(DEFAULT_US_STOCKS)} stocks")
     return DEFAULT_US_STOCKS
 
 
