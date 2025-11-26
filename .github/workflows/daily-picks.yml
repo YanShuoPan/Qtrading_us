@@ -42,9 +42,9 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          # Add generated files (use -f to force add ignored files)
+          # Add generated files (but exclude large sqlite files)
           git add docs/
-          git add -f data/
+          git add data/*.json 2>/dev/null || true
           git add output/ 2>/dev/null || true
 
           # Check if there are changes to commit
