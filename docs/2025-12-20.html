@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Stock Picks - 2025-12-20</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header .date {
+            font-size: 1.2em;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section.strong-momentum .section-title {
+            border-left-color: #48bb78;
+        }
+
+        .section.potential .section-title {
+            border-left-color: #ed8936;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stock-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .stock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stock-code {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .stock-name {
+            font-size: 0.95em;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .stock-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .metric {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .metric-label {
+            font-size: 0.75em;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 3px;
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .no-stocks {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .stock-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇺🇸 US Stock Picks</h1>
+            <div class="date">📅 2025-12-20</div>
+        </div>
+
+        <div class="section strong-momentum">
+            <div class="section-title">🔥 Strong Momentum (2 stocks)</div>
+            <div class="stock-grid">
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">LLY</div>
+                    </div>
+                    <div class="stock-name">Eli Lilly</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$1071.44</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$1043.95</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.997</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">1.03%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">LRCX</div>
+                    </div>
+                    <div class="stock-name">LRCX</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$172.27</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$159.51</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.951</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">3.75%</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+                <img src="strong_momentum_20251220.png" alt="Strong Momentum Stocks Chart">
+            </div>
+
+        </div>
+
+        <div class="section potential">
+            <div class="section-title">👀 Potential Stocks (6 stocks)</div>
+            <div class="stock-grid">
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">TMC</div>
+                    </div>
+                    <div class="stock-name">TMC</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$7.89</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$6.84</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.095</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">7.59%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">CDTX</div>
+                    </div>
+                    <div class="stock-name">CDTX</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$220.80</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$220.14</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.083</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">0.13%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">HOUS</div>
+                    </div>
+                    <div class="stock-name">HOUS</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$14.48</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$14.34</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.103</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">2.08%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">LKQ</div>
+                    </div>
+                    <div class="stock-name">LKQ</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$29.74</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$29.67</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.016</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">1.13%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">SUPV</div>
+                    </div>
+                    <div class="stock-name">SUPV</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$11.91</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$10.97</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.044</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">4.71%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">KGS</div>
+                    </div>
+                    <div class="stock-name">KGS</div>
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Close</div>
+                            <div class="metric-value">$36.31</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">MA20</div>
+                            <div class="metric-value">$35.86</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Slope</div>
+                            <div class="metric-value">0.119</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Volatility</div>
+                            <div class="metric-value">2.02%</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+                <img src="potential_stocks_20251220.png" alt="Potential Stocks Chart">
+            </div>
+
+        </div>
+
+        <div style="text-align: center;">
+            <a href="index.html" class="back-link">← Back to All Picks</a>
+        </div>
+    </div>
+</body>
+</html>
