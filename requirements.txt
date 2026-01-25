@@ -1,4 +1,4 @@
 pandas>=2.0.0
-yfinance>=0.2.40
+yfinance==0.2.48
 matplotlib>=3.7.0
 python-dotenv>=1.0.0

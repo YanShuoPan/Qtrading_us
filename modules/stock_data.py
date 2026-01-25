@@ -4,15 +4,23 @@ Stock data processing module - Download stock data and stock selection logic
 from datetime import datetime, timedelta
 import pandas as pd
 import yfinance as yf
+import time
+import random
 from .database import get_existing_data_range
 from .logger import get_logger
 
 logger = get_logger(__name__)
 
+# Configuration for batch downloading
+BATCH_SIZE = 250  # Number of stocks per batch
+BATCH_DELAY_MIN = 2  # Minimum seconds between batches
+BATCH_DELAY_MAX = 4  # Maximum seconds between batches
+MAX_RETRIES = 3  # Maximum retry attempts per batch
+
 
 def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
     """
-    Download stock price data from Yahoo Finance
+    Download stock price data from Yahoo Finance with batch processing and retry mechanism
 
     Args:
         codes: List of stock ticker symbols
@@ -31,12 +39,12 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
             continue
         if c not in existing:
             codes_to_fetch.append(c)
-            logger.info(f"{c}: No historical data, need to download")
+            logger.debug(f"{c}: No historical data, need to download")
         else:
             max_date = existing[c]["max"]
             if max_date < datetime.utcnow().date().isoformat():
                 codes_to_fetch.append(c)
-                logger.info(f"{c}: Data outdated (latest: {max_date}), need update")
+                logger.debug(f"{c}: Data outdated (latest: {max_date}), need update")
             else:
                 logger.debug(f"{c}: Data up to date (latest: {max_date})")
 
@@ -44,44 +52,92 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
         logger.info("All stock data is up to date, no download needed")
         return pd.DataFrame()
 
-    # For US stocks, no need to add suffix
-    tickers = codes_to_fetch
-    logger.info(f"\nDownloading {len(codes_to_fetch)} stocks")
+    logger.info(f"\n📊 Downloading {len(codes_to_fetch)} stocks in batches")
     logger.info(f"Period: {target_start} ~ today")
+    logger.info(f"Batch size: {BATCH_SIZE} stocks per batch")
 
-    df = yf.download(
-        tickers=" ".join(tickers),
-        start=target_start,
-        interval="1d",
-        group_by="ticker",
-        auto_adjust=False,
-        progress=False,
-    )
+    # Split into batches
+    num_batches = (len(codes_to_fetch) + BATCH_SIZE - 1) // BATCH_SIZE
+    logger.info(f"Total batches: {num_batches}")
 
-    logger.info(f"yfinance download complete, data type: {type(df)}, shape: {df.shape if hasattr(df, 'shape') else 'N/A'}")
+    all_results = []
+    failed_stocks = []
 
-    out = []
-    for c in codes_to_fetch:
-        if isinstance(df, pd.DataFrame) and c in df:
-            tmp = df[c].reset_index().rename(columns=str.lower)
-            logger.info(f"Stock {c}: Downloaded {len(tmp)} records")
+    for batch_idx in range(num_batches):
+        start_idx = batch_idx * BATCH_SIZE
+        end_idx = min((batch_idx + 1) * BATCH_SIZE, len(codes_to_fetch))
+        batch_codes = codes_to_fetch[start_idx:end_idx]
 
-            if "date" in tmp.columns:
-                logger.info(f"Stock {c}: Original date type = {tmp['date'].dtype}, range = {tmp['date'].min()} ~ {tmp['date'].max()}")
-                tmp["date"] = pd.to_datetime(tmp["date"]).dt.tz_localize(None)
-                logger.info(f"Stock {c}: Converted date type = {tmp['date'].dtype}, range = {tmp['date'].min()} ~ {tmp['date'].max()}")
-                logger.info(f"Stock {c}: Unique dates = {tmp['date'].nunique()}")
+        logger.info(f"\n🔄 Batch {batch_idx + 1}/{num_batches}: Processing {len(batch_codes)} stocks ({start_idx + 1}-{end_idx})")
 
-            tmp["code"] = c
-            out.append(tmp[["code", "date", "open", "high", "low", "close", "volume"]])
-        else:
-            logger.warning(f"Stock {c}: Unable to retrieve data from yfinance")
+        # Retry mechanism for each batch
+        batch_success = False
+        for attempt in range(MAX_RETRIES):
+            try:
+                df = yf.download(
+                    tickers=" ".join(batch_codes),
+                    start=target_start,
+                    interval="1d",
+                    group_by="ticker",
+                    auto_adjust=False,
+                    progress=False,
+                )
 
-    result = pd.concat(out, ignore_index=True) if out else pd.DataFrame()
-    logger.info(f"Successfully downloaded {len(result)} records")
+                # Process downloaded data
+                batch_out = []
+                for c in batch_codes:
+                    if isinstance(df, pd.DataFrame) and c in df:
+                        tmp = df[c].reset_index().rename(columns=str.lower)
+
+                        if "date" in tmp.columns and len(tmp) > 0:
+                            tmp["date"] = pd.to_datetime(tmp["date"]).dt.tz_localize(None)
+                            tmp["code"] = c
+                            batch_out.append(tmp[["code", "date", "open", "high", "low", "close", "volume"]])
+                            logger.debug(f"  ✓ {c}: {len(tmp)} records")
+                        else:
+                            logger.warning(f"  ✗ {c}: No valid data")
+                            failed_stocks.append(c)
+                    else:
+                        logger.warning(f"  ✗ {c}: Not in response")
+                        failed_stocks.append(c)
+
+                if batch_out:
+                    all_results.extend(batch_out)
+
+                logger.info(f"  ✅ Batch {batch_idx + 1} completed: {len(batch_out)}/{len(batch_codes)} stocks successful")
+                batch_success = True
+                break  # Success, exit retry loop
+
+            except Exception as e:
+                logger.warning(f"  ⚠️ Batch {batch_idx + 1} attempt {attempt + 1}/{MAX_RETRIES} failed: {str(e)}")
+                if attempt < MAX_RETRIES - 1:
+                    retry_delay = (attempt + 1) * 2
+                    logger.info(f"  ⏳ Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                else:
+                    logger.error(f"  ❌ Batch {batch_idx + 1} failed after {MAX_RETRIES} attempts")
+                    failed_stocks.extend(batch_codes)
+
+        # Add delay between batches (except for the last batch)
+        if batch_idx < num_batches - 1:
+            delay = random.uniform(BATCH_DELAY_MIN, BATCH_DELAY_MAX)
+            logger.info(f"  ⏸️  Waiting {delay:.1f}s before next batch...")
+            time.sleep(delay)
+
+    # Combine all results
+    result = pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame()
+
+    logger.info(f"\n✅ Download complete:")
+    logger.info(f"  Total records: {len(result)}")
+    logger.info(f"  Successful stocks: {len(codes_to_fetch) - len(failed_stocks)}/{len(codes_to_fetch)}")
+    if failed_stocks:
+        logger.warning(f"  Failed stocks ({len(failed_stocks)}): {', '.join(failed_stocks[:10])}" +
+                      (f" and {len(failed_stocks) - 10} more..." if len(failed_stocks) > 10 else ""))
+
     if not result.empty and 'date' in result.columns:
-        logger.info(f"Combined date range: {result['date'].min()} ~ {result['date'].max()}")
-        logger.info(f"Combined unique dates: {result['date'].nunique()}")
+        logger.info(f"  Date range: {result['date'].min()} ~ {result['date'].max()}")
+        logger.info(f"  Unique dates: {result['date'].nunique()}")
+
     return result
 
 

@@ -138,27 +138,34 @@ def load_stock_list_from_json(filepath='data/us_stock_list.json'):
 def get_stock_codes():
     """
     Get stock codes list with priority:
-    1. Environment variable US_STOCK_CODES
-    2. JSON file (data/us_stock_list.json)
-    3. Default hardcoded list
+    1. Environment variable US_STOCK_CODES (for testing/override)
+    2. Fixed stock list (data/fixed_stock_list_tickers.json) - 2000 liquid stocks
+    3. Full JSON file (data/us_stock_list.json) - 11,000+ stocks
+    4. Default hardcoded list - 230 major stocks
 
     Returns:
         list: Stock ticker symbols
     """
-    # Priority 1: Custom codes from environment variable
+    # Priority 1: Custom codes from environment variable (testing/override)
     custom_codes = os.environ.get("US_STOCK_CODES", "").strip()
     if custom_codes:
         codes = [c.strip() for c in custom_codes.split(",") if c.strip()]
         logger.info(f"Using custom stock list from env: {len(codes)} stocks")
         return codes
 
-    # Priority 2: Load from JSON file
-    json_codes = load_stock_list_from_json()
+    # Priority 2: Fixed stock list (2000 liquid stocks)
+    fixed_codes = load_stock_list_from_json('data/fixed_stock_list_tickers.json')
+    if fixed_codes:
+        logger.info(f"Using FIXED stock list: {len(fixed_codes)} stocks (liquid stocks)")
+        return fixed_codes
+
+    # Priority 3: Full JSON file (11,000+ stocks)
+    json_codes = load_stock_list_from_json('data/us_stock_list.json')
     if json_codes:
-        logger.info(f"Using stock list from JSON: {len(json_codes)} stocks")
+        logger.info(f"Using full stock list from JSON: {len(json_codes)} stocks")
         return json_codes
 
-    # Priority 3: Default hardcoded list
+    # Priority 4: Default hardcoded list
     logger.info(f"Using default hardcoded stock list: {len(DEFAULT_US_STOCKS)} stocks")
     return DEFAULT_US_STOCKS
 
