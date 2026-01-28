@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nul)",
+      "Bash(dir:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git fetch:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: Exclude large SQLite files from git tracking\n\n- Add *.sqlite and *.db to .gitignore\n- Remove us_stocks.sqlite from git tracking (file was 107MB)\n- Update GitHub Actions to only commit JSON files from data/\n- SQLite database will be regenerated on each workflow run\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(gh run list:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

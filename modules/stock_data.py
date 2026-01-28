@@ -12,9 +12,9 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 # Configuration for batch downloading
-BATCH_SIZE = 250  # Number of stocks per batch
-BATCH_DELAY_MIN = 2  # Minimum seconds between batches
-BATCH_DELAY_MAX = 4  # Maximum seconds between batches
+BATCH_SIZE = 100  # Number of stocks per batch (reduced from 250)
+BATCH_DELAY_MIN = 3  # Minimum seconds between batches (increased from 2)
+BATCH_DELAY_MAX = 6  # Maximum seconds between batches (increased from 4)
 MAX_RETRIES = 3  # Maximum retry attempts per batch
 
 
@@ -74,6 +74,11 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
         batch_success = False
         for attempt in range(MAX_RETRIES):
             try:
+                # Add user agent to avoid being blocked
+                import yfinance as yf_module
+                if hasattr(yf_module, 'set_tz_cache_location'):
+                    yf_module.set_tz_cache_location("/tmp/yfinance_cache")
+
                 df = yf.download(
                     tickers=" ".join(batch_codes),
                     start=target_start,
@@ -81,6 +86,8 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
                     group_by="ticker",
                     auto_adjust=False,
                     progress=False,
+                    threads=True,
+                    timeout=30,
                 )
 
                 # Process downloaded data
@@ -109,13 +116,22 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
                 break  # Success, exit retry loop
 
             except Exception as e:
-                logger.warning(f"  ⚠️ Batch {batch_idx + 1} attempt {attempt + 1}/{MAX_RETRIES} failed: {str(e)}")
+                error_msg = str(e)
+                logger.warning(f"  ⚠️ Batch {batch_idx + 1} attempt {attempt + 1}/{MAX_RETRIES} failed: {error_msg}")
+
+                # Check if it's a JSON parsing error (API rate limit or empty response)
+                if "Expecting value" in error_msg or "JSON" in error_msg:
+                    logger.warning(f"  💡 Detected API rate limit or invalid response, increasing delay...")
+                    retry_delay = (attempt + 1) * 5  # Longer delay for rate limit
+                else:
+                    retry_delay = (attempt + 1) * 3  # Standard exponential backoff
+
                 if attempt < MAX_RETRIES - 1:
-                    retry_delay = (attempt + 1) * 2
                     logger.info(f"  ⏳ Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                 else:
                     logger.error(f"  ❌ Batch {batch_idx + 1} failed after {MAX_RETRIES} attempts")
+                    logger.error(f"  📝 Error details: {error_msg}")
                     failed_stocks.extend(batch_codes)
 
         # Add delay between batches (except for the last batch)
