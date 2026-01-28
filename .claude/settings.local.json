@@ -15,7 +15,8 @@
       "Bash(git push:*)",
       "Bash(git pull:*)",
       "Bash(gh run list:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nImprove batch download strategy to balance API rate limits\n\nKey improvements:\n1. Balanced batch size: 100 → 150 stocks per batch\n   - Reduces total batches from 20 to ~14 (for 2000 stocks)\n   - Fewer API calls while maintaining reliability\n   - Sweet spot between 100 (too many requests) and 250 (rate limit)\n\n2. Increased inter-batch delays: 3-6s → 4-8s\n   - More conservative pacing between requests\n   - Reduces risk of triggering frequency limits\n   - Random delays prevent pattern detection\n\n3. Initial delay before first batch (2s)\n   - Prevents burst requests at start\n   - Gives API time to prepare\n\n4. Adaptive delay strategy\n   - Tracks consecutive failures\n   - Automatically extends delays by +50% per consecutive failure\n   - Example: After 2 failures, delays become 6-12s instead of 4-8s\n   - Self-healing mechanism for rate limit issues\n\n5. Better failure tracking\n   - Resets failure counter on success\n   - Distinguishes between transient and persistent issues\n   - Logs extended delays for debugging\n\nExpected behavior:\n- Normal execution: 14 batches × 6s avg = ~1.5-2 min\n- With rate limits: Auto-extends to 3-4 min with higher success rate\n- Balances speed vs reliability\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

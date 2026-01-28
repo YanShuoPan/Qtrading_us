@@ -12,10 +12,11 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 # Configuration for batch downloading
-BATCH_SIZE = 100  # Number of stocks per batch (reduced from 250)
-BATCH_DELAY_MIN = 3  # Minimum seconds between batches (increased from 2)
-BATCH_DELAY_MAX = 6  # Maximum seconds between batches (increased from 4)
+BATCH_SIZE = 150  # Number of stocks per batch (balanced between 100-250)
+BATCH_DELAY_MIN = 4  # Minimum seconds between batches (increased from 3)
+BATCH_DELAY_MAX = 8  # Maximum seconds between batches (increased from 6)
 MAX_RETRIES = 3  # Maximum retry attempts per batch
+INITIAL_DELAY = 2  # Initial delay before first batch to avoid burst
 
 
 def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
@@ -62,6 +63,12 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
 
     all_results = []
     failed_stocks = []
+    consecutive_failures = 0  # Track consecutive failures to adjust delays
+
+    # Initial delay to avoid burst requests
+    if num_batches > 1:
+        logger.info(f"⏸️  Initial delay of {INITIAL_DELAY}s before starting batch downloads...")
+        time.sleep(INITIAL_DELAY)
 
     for batch_idx in range(num_batches):
         start_idx = batch_idx * BATCH_SIZE
@@ -113,6 +120,7 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
 
                 logger.info(f"  ✅ Batch {batch_idx + 1} completed: {len(batch_out)}/{len(batch_codes)} stocks successful")
                 batch_success = True
+                consecutive_failures = 0  # Reset failure counter on success
                 break  # Success, exit retry loop
 
             except Exception as e:
@@ -133,11 +141,19 @@ def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
                     logger.error(f"  ❌ Batch {batch_idx + 1} failed after {MAX_RETRIES} attempts")
                     logger.error(f"  📝 Error details: {error_msg}")
                     failed_stocks.extend(batch_codes)
+                    consecutive_failures += 1
 
         # Add delay between batches (except for the last batch)
         if batch_idx < num_batches - 1:
-            delay = random.uniform(BATCH_DELAY_MIN, BATCH_DELAY_MAX)
-            logger.info(f"  ⏸️  Waiting {delay:.1f}s before next batch...")
+            # Increase delay if there are consecutive failures
+            delay_multiplier = 1 + (consecutive_failures * 0.5)  # +50% per failure
+            base_delay = random.uniform(BATCH_DELAY_MIN, BATCH_DELAY_MAX)
+            delay = base_delay * delay_multiplier
+
+            if consecutive_failures > 0:
+                logger.info(f"  ⏸️  Waiting {delay:.1f}s before next batch (extended due to {consecutive_failures} consecutive failures)...")
+            else:
+                logger.info(f"  ⏸️  Waiting {delay:.1f}s before next batch...")
             time.sleep(delay)
 
     # Combine all results
