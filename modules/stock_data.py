@@ -195,7 +195,20 @@ def pick_stocks(prices: pd.DataFrame, top_k=12) -> pd.DataFrame:
         DataFrame: Stock selection results
     """
     if prices.empty:
+        logger.warning("Input prices DataFrame is empty")
         return pd.DataFrame()
+
+    # Validate required columns
+    required_columns = ['code', 'date', 'open', 'high', 'low', 'close', 'volume']
+    missing_columns = [col for col in required_columns if col not in prices.columns]
+    if missing_columns:
+        logger.error(f"Missing required columns: {missing_columns}")
+        logger.error(f"Available columns: {prices.columns.tolist()}")
+        raise ValueError(f"DataFrame missing required columns: {missing_columns}")
+
+    logger.info(f"Processing {len(prices)} price records for stock selection")
+    logger.info(f"Unique stocks: {prices['code'].nunique()}")
+
     prices = prices.sort_values(["code", "date"])
 
     def add_feat(g):
@@ -203,7 +216,16 @@ def pick_stocks(prices: pd.DataFrame, top_k=12) -> pd.DataFrame:
         g["ma20"] = g["close"].rolling(20, min_periods=20).mean()
         return g
 
-    feat = prices.groupby("code", group_keys=False).apply(add_feat)
+    feat = prices.groupby("code", group_keys=False).apply(add_feat).reset_index(drop=True)
+
+    # Ensure 'code' column is preserved
+    if 'code' not in feat.columns and 'code' in prices.columns:
+        logger.warning("'code' column lost after groupby, reconstructing...")
+        # This shouldn't happen, but add safety check
+        feat = prices.copy()
+        feat["ma20"] = feat.groupby("code")["close"].transform(lambda x: x.rolling(20, min_periods=20).mean())
+
+    logger.info(f"Features calculated, DataFrame has {len(feat)} records with columns: {feat.columns.tolist()}")
 
     results = []
     for code, group in feat.groupby("code"):

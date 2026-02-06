@@ -104,6 +104,19 @@ def load_recent_prices(days=120) -> pd.DataFrame:
             conn,
             parse_dates=["date"],
         )
+
+    logger.info(f"Loaded {len(df)} records from database")
+
+    if df.empty:
+        logger.warning("Database is empty, no data to process")
+        return pd.DataFrame()
+
+    logger.info(f"DataFrame columns: {df.columns.tolist()}")
+    logger.info(f"Date range in DB: {df['date'].min()} to {df['date'].max()}")
+
     cutoff = datetime.utcnow() - timedelta(days=days)
     df = df[df["date"] >= cutoff]
+
+    logger.info(f"After filtering last {days} days: {len(df)} records")
+
     return df
