@@ -12,11 +12,11 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 # Configuration for batch downloading
-BATCH_SIZE = 150  # Number of stocks per batch (balanced between 100-250)
-BATCH_DELAY_MIN = 4  # Minimum seconds between batches (increased from 3)
-BATCH_DELAY_MAX = 8  # Maximum seconds between batches (increased from 6)
+BATCH_SIZE = 200  # Number of stocks per batch (increased from 150)
+BATCH_DELAY_MIN = 2  # Minimum seconds between batches (reduced for speed)
+BATCH_DELAY_MAX = 4  # Maximum seconds between batches (reduced for speed)
 MAX_RETRIES = 3  # Maximum retry attempts per batch
-INITIAL_DELAY = 2  # Initial delay before first batch to avoid burst
+INITIAL_DELAY = 1  # Initial delay before first batch to avoid burst
 
 
 def fetch_prices_yf(codes, lookback_days=120) -> pd.DataFrame:
