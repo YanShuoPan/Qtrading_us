@@ -63,8 +63,7 @@ jobs:
           path: |
             output/*.csv
             output/*.png
-            docs/
-          retention-days: 30
+          retention-days: 7
 
   deploy-pages:
     needs: run-stock-picker
