@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-02-13",
+    "strong": 5,
+    "potential": 6,
+    "total": 11
+  },
+  {
     "date": "2026-02-12",
     "strong": 6,
     "potential": 6,
@@ -172,11 +178,5 @@
     "strong": 3,
     "potential": 6,
     "total": 9
-  },
-  {
-    "date": "2025-12-18",
-    "strong": 0,
-    "potential": 6,
-    "total": 6
   }
 ]
